@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Roblox account generator - Dimitar Bogdanov</title>
+    <link rel="stylesheet" href="./main.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0">
+    <meta name="description" content="The website of a 15 year-old guy, interested in software engineering.">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="black">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+    <script src="https://kit.fontawesome.com/ae0df6760c.js" crossorigin="anonymous"></script>
+
+    <style>
+        .border {
+            border: 1px solid white;
+            margin: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <br class="noselect" />
+
+    <div class="container">
+        <div class="header">
+            <h1 class="centerText noselect">Roblox account generator</h1>
+        </div>
+
+        <div class="main">
+            <section>
+                <h2 class="noselect"><i class="fas fa-caret-square-right"></i> READ BEFORE USING</h2>
+                <p>
+                    Disable your CORS if this does not work. This can be done with an extension. <a href="https://mybrowseraddon.com/access-control-allow-origin.html">Here's one</a>. This page is 100% guranteed safe (and <a href="https://github.com/DimitarBogdanov/dimitarbogdanov.github.io/blob/main/rbxaccgen.html"
+                        target="_blank">open source</a>). You probably want to disable the extension outside of this website, though.
+                </p>
+                <p>
+                    I don't take any responsibility for what you do with this.
+                </p>
+            </section>
+            <section>
+                <h2 class="noselect"><i class="fas fa-caret-square-right"></i> How this works</h2>
+                <p>
+                    Basically, the way most of these ROBLOX bot accounts are set up is that the password is the reverse of the username. For example, if the username is "User", the password is "resU". Pretty clever! There are groups that have thousands of these accounts
+                    as well.
+                </p>
+                <p>
+                    The template of username this page looks for in a group is "FirstnameLastnameNN", where NN is a two-digit number. For example, a valid name would be BillGates12.
+                </p>
+            </section>
+            <section>
+                <h2 class="noselect"><i class="fas fa-caret-square-right"></i> Magic button</h2>
+                <p>
+                    <button id="gen" onclick="getAccount()">
+						Generate account
+                	</button>
+                    <br /><br />
+                </p>
+            </section>
+            <section>
+                <h2 class="noselect"><i class="fas fa-caret-square-right"></i> Generated accounts</h2>
+
+                <div id="__template__" style="display: none;">
+                    <table class="border">
+                        <thead>
+                            <tr class="border">
+                                <th colspan="2">Account generator result</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border">
+                                <td class="border">Username</td>
+                                <td class="border"><textarea name="user" rows=1 readonly style="resize: none;"></textarea></td>
+                            </tr>
+                            <tr class="border">
+                                <td class="border">Password</td>
+                                <td class="border"><textarea name="pass" rows=1 readonly style="resize: none;"></textarea></td>
+                            </tr>
+                            <tr class="border">
+                                <td class="border" colspan=2>
+                                    <center>
+                                        <button onclick="remove(this);">Remove</button>
+                                        <button onclick="copy(this, 'user');">Copy user</button>
+                                        <button onclick="copy(this, 'pass');">Copy pass</button>
+                                    </center>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p>
+                    <div id="cnt" class="container" style="display: inline-block;">
+
+                    </div>
+                </p>
+            </section>
+        </div>
+
+        <div class="footer">
+            <p class="centerText noselect" id="copyright">COPYRIGHT © DIMITAR BOGDANOV</p>
+        </div>
+    </div>
+
+    <br class="noselect" />
+
+    <script>
+        // Copyright text year because I'll 100% forget to update it
+        document.getElementById("copyright").innerText = "COPYRIGHT © " + new Date().getFullYear() + " DIMITAR BOGDANOV"
+
+        var members = 910000; // rough estimate
+        var previous = [];
+        var ogCursor = "178723628_1_6dfb7e85ae986e6ce84c46500842dae7"
+        var nextCursor = ogCursor
+        var debounce = false;
+
+        const http = new XMLHttpRequest();
+        http.open("GET", 'https://groups.roblox.com/v1/groups/3117875');
+        http.send();
+
+        http.onload = () => {
+            members = JSON.parse(http.response).memberCount - 200;
+        }
+
+        function remove(el) {
+            el.parentElement.parentElement.parentElement.parentElement.parentElement.remove();
+        }
+
+        function randomNumber(minimum, maximum) {
+            return Math.round(Math.random() * (maximum - minimum) + minimum);
+        }
+
+        function getAccount() {
+            //if (debounce) return;
+            debounce = true;
+            document.getElementById("gen").innerHTML = "Please wait..."
+            let url = 'https://groups.roblox.com/v1/groups/3117875/roles/21441130/users?cursor=' + nextCursor + '&limit=50&sortOrder=Asc'
+            let req = new XMLHttpRequest();
+
+            var user = null
+
+            var skipPages = randomNumber(1, 10);
+            var i = 0;
+            req.onload = () => {
+                var url = 'https://groups.roblox.com/v1/groups/3117875/roles/21441130/users?cursor=' + nextCursor + '&limit=50&sortOrder=Asc'
+
+                var obj = JSON.parse(req.response)
+                if (i > skipPages) {
+                    let data = obj.data
+                    let acc = data[randomNumber(0, 49)]
+
+                    if (previous.includes(acc.username)) {
+                        skipPages += 3;
+                        req.open("GET", url);
+                        req.send();
+                    }
+
+                    var match = acc.username.match(/[A-Z][a-z]+[A-Z][a-z]+\d\d/g);
+                    if (match === null) {
+                        skipPages += 3;
+                        req.open("GET", url);
+                        req.send();
+                    }
+
+                    if (acc.username.length !== match.length) {
+                        skipPages += 3;
+                        req.open("GET", url);
+                        req.send();
+                    }
+
+                    showAccount(acc.username)
+                    previous.push(acc.username);
+                    document.getElementById("gen").innerHTML = "Generate account"
+                    debounce = false;
+                    req = null;
+                }
+
+                nextCursor = obj.nextPageCursor
+                if (nextCursor == null) nextCursor = ogCursor;
+                url = 'https://groups.roblox.com/v1/groups/3117875/roles/21441130/users?cursor=' + nextCursor + '&limit=50&sortOrder=Asc'
+                req.open("GET", url);
+                req.send();
+                i++
+            }
+            req.open("GET", url);
+            req.send();
+        }
+
+        function getAccount2() {
+            const results = 10;
+            var startPage = 80;
+            var maxPage = Math.floor((members / results) - startPage);
+            var page = randomNumber(startPage, maxPage);
+            var account = randomNumber(0, 9)
+        }
+
+        function showAccount(user) {
+            let template = document.getElementById("__template__");
+            let newEl = template.cloneNode(true);
+            newEl.style.display = "inherit";
+            newEl.querySelectorAll('[name=user]')[0].innerText = user
+            newEl.querySelectorAll('[name=pass]')[0].innerText = user.split('').reverse().join('');
+            document.getElementById("cnt").append(newEl)
+        }
+
+        function generate() {
+            if (debounce === true) return;
+            document.getElementById("gen").innerHTML = "Please wait..."
+            debounce = true;
+
+            while (true) {
+                let acc = getAccount();
+
+
+                showAccount(acc);
+                break;
+            }
+            debounce = false;
+            document.getElementById("gen").innerHTML = "Generate account"
+        }
+
+        function copy(el, name) {
+            el = el.parentElement.parentElement.parentElement.parentElement.querySelectorAll('[name=' + name + ']')[0];
+
+            const text = el.innerHTML;
+
+            navigator.clipboard.writeText(el.innerHTML);
+            el.innerText = "Copied!"
+            el.focus();
+            el.setSelectionRange(0, 900);
+
+            setTimeout(() => {
+                el.innerText = text;
+            }, 500);
+        }
+    </script>
+</body>
+
+</html>
